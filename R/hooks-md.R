@@ -121,7 +121,16 @@ render_markdown = function(strict = FALSE, fence_char = '`') {
         l = max(l)
         if (l >= 4) fence = paste(rep(fence_char, l), collapse = '')
       }
-      paste0('\n\n', fence, block_class(class), x, fence, '\n\n')
+      if(!is.null(options$fold) && options$fold == "source") {
+        paste0('\n\n',
+               "<details>\n\n",
+               "<summary>", options$fold_summary %n% "Source code", "</summary>\n\n",
+               fence, block_class(class), x, fence,
+               "</details>",
+               '\n\n')
+      } else {
+        paste0('\n\n', fence, block_class(class), x, fence, '\n\n')
+      }
     }
   }
   hook.o = function(x, options) {
@@ -134,7 +143,17 @@ render_markdown = function(strict = FALSE, fence_char = '`') {
     if (!is.null(options$class.source)) {
       language = block_class(c(language, options$class.source))
     }
-    paste0('\n\n', fence, language, '\n', x, fence, '\n\n')
+    # Folding
+    if(!is.null(options$fold) && options$fold == "source") {
+      paste0('\n\n',
+             "<details>\n\n",
+             "<summary>", options$fold_summary %n% "Source code", "</summary>\n\n",
+             fence, language, '\n', x, fence,
+             "</details>\n",
+             '\n\n')
+    } else {
+      paste0('\n\n', fence, language, '\n', x, fence, '\n\n')
+    }
   }
   knit_hooks$set(
     source = function(x, options) {
